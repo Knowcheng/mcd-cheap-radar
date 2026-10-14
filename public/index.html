@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+ <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+ <meta name="theme-color" content="#fff9ed"><meta name="description" content="不用先想吃什么，看看附近有什么便宜的。发现低价餐品、可领取券和门店优惠。">
+ <title>麦麦低价雷达 · 给你一个吃它的理由</title><link rel="stylesheet" href="/style.css">
+</head>
+<body>
+ <div class="app-shell">
+  <header class="masthead"><a class="brand" href="/" aria-label="麦麦低价雷达首页"><span class="brand-icon">↗</span><span>麦麦低价雷达<small>CHEAP FINDS, GOOD REASONS.</small></span></a><button class="account-button" id="account">连接我的账号 <span>↗</span></button></header>
+  <main>
+   <section class="intro"><div class="eyebrow"><span class="pulse-dot"></span> 随便吃点？让价格替你决定。</div><h1>便宜，<br>是今天吃它的理由<span class="yellow-dot">。</span></h1><p>咖啡、小食、汉堡都可以。看看附近哪家店、哪张券，<br class="desktop-break">能让你用更少的钱，吃到一点小开心。</p></section>
+   <section class="search-panel" aria-label="查找附近低价餐品">
+    <form id="search-form"><label class="city-field">城市<input id="city" name="city" maxlength="30" placeholder="例如：佛山市" autocomplete="address-level2"></label><label class="address-field">附近地点<input id="address" name="address" maxlength="200" placeholder="输入商场、地铁站或附近街道" autocomplete="off"></label><label class="range-field">愿意走多远<select id="radius"><option value="1000">1 公里内</option><option value="3000" selected>3 公里内</option><option value="5000">5 公里内</option><option value="10000">10 公里内</option></select></label><button class="primary-button" type="submit" id="scan-button">发现低价 <span>→</span></button></form>
+    <div class="search-bottom"><span id="mode-label">演示模式 · 价格和优惠为示例</span><button class="text-button" id="demo-button" type="button">试试演示</button></div>
+   </section>
+   <div id="notice" class="notice" role="status" aria-live="polite" hidden></div>
+   <section class="results-section"><div class="section-heading"><div><span class="eyebrow">TODAY'S LITTLE WINS</span><h2>今天，吃这些很划算</h2></div><span class="checked" id="checked"></span></div>
+    <div class="filters" aria-label="筛选餐品"><div class="category-filters"><button class="chip active" data-category="all" aria-pressed="true">全部</button><button class="chip" data-category="drink" aria-pressed="false">☕ 饮品</button><button class="chip" data-category="snack" aria-pressed="false">🍦 小食甜品</button><button class="chip" data-category="meal" aria-pressed="false">🍔 主食套餐</button></div><label class="budget-filter">实付 <select id="budget"><option value="999999">不限</option><option value="0">0 元</option><option value="1000">10 元以内</option><option value="2000">20 元以内</option></select></label></div>
+    <div class="offers" id="offers" aria-live="polite"></div><p class="coverage" id="coverage"></p>
+   </section>
+   <section class="coupon-section"><div class="section-heading"><div><span class="eyebrow">DON'T MISS A GOOD COUPON</span><h2>好券，先看看有没有</h2></div><button class="outline-button" id="claim-button">一键领免费券 ↗</button></div><div id="coupons" class="coupon-grid"></div><div class="watch-row"><span>手动检查新券和更低价格，不自动轮询。</span><button class="text-button" id="watch-button">检查一次优惠变化</button></div></section>
+   <section class="campaign-section"><button id="campaign-toggle" class="campaign-toggle" aria-expanded="false">📅 看看活动线索 <span>＋</span></button><div id="campaigns" class="campaign-text" hidden></div></section>
+  </main>
+  <footer><strong>少花一点，开心一点。</strong><p>独立开发的参赛作品，非麦当劳官方产品。实时价格与供应以官方结算为准。</p><div><a href="https://github.com/Knowcheng/mcd-cheap-radar" target="_blank" rel="noopener noreferrer">开源项目 ↗</a><span> · </span><a href="https://open.mcd.cn/mcp" target="_blank" rel="noopener noreferrer">申请个人 MCP Token ↗</a></div></footer>
+ </div>
+ <dialog id="account-dialog"><div class="dialog-head"><h2>连接你自己的账号</h2><button class="close-button" id="close-account" aria-label="关闭账号连接">×</button></div><p>在麦当劳开放平台申请个人 MCP Token，在本人设备连接后可查询你的券和门店实付价。</p><p id="public-account-note" class="privacy-note" hidden>此公开页面只提供演示，不接收个人 Token。真实优惠请按开源项目说明，在本人设备或个人 MCP 客户端使用。</p><form id="connect-form"><label>个人 MCP Token<input id="token" type="password" autocomplete="off" maxlength="4096" placeholder="粘贴个人 Token" required></label><p class="privacy-note">仅在本人本机服务内存中保留 30 分钟，不写入文件或浏览器存储。只连接本人账号；领券需另行确认。</p><button class="primary-button" id="connect-button" type="submit">连接并查询我的优惠 →</button></form><button id="disconnect" class="text-button danger" hidden>断开连接并删除会话</button><a class="dialog-link" href="https://open.mcd.cn/mcp" target="_blank" rel="noopener noreferrer">还没有 Token？去官方平台申请 ↗</a></dialog>
+ <dialog id="offer-dialog"><div class="dialog-head"><h2>怎么拿到这个价格</h2><button class="close-button" id="close-offer" aria-label="关闭点餐步骤">×</button></div><div id="offer-detail"></div><button class="primary-button" id="copy-offer">复制点餐步骤 →</button></dialog>
+ <dialog id="claim-dialog"><div class="dialog-head"><h2>领取当前可领的免费券</h2><button class="close-button" id="close-claim" aria-label="关闭领券确认">×</button></div><p>这会调用麦当劳官方的一键领券，领取本账号当前可领的麦麦省券。领取后需要重新查询门店，确认哪些券能用。</p><p class="privacy-note">本次操作只领券，不下单、不买卡、不扣积分。限量券是否能领到，以官方返回为准。</p><button class="primary-button" id="confirm-claim">确认领取 →</button></dialog>
+ <script type="module" src="/app.js"></script>
+</body></html>
