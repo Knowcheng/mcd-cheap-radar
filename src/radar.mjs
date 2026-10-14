@@ -22,8 +22,9 @@ export function validateQuote(raw,candidate){
     verified:true,checkedAt:new Date().toISOString()};
 }
 async function call(client,name,values={}){return client.call(name,client.args(name,values));}
-export async function scan(client,{address,city,maxStores=3,maxQuotes=24,radiusMeters=3000}={}){
+export async function scan(client,{address,city,category='all',maxStores=3,maxQuotes=24,radiusMeters=3000}={}){
   if(typeof address!=='string'||!address.trim()||address.length>200)throw new Error('请填写城市和附近地点，最多 200 字');
+  if(!['all','meal','drink','snack'].includes(category))throw new Error('请选择有效的餐品分类');
   city=city?.trim()||address.match(/([^省自治区]{2,8}市)/)?.[1];
   maxStores=Math.max(1,Math.min(5,Math.floor(Number(maxStores)||3)));
   maxQuotes=Math.max(1,Math.min(100,Math.floor(Number(maxQuotes)||24)));
@@ -44,6 +45,8 @@ export async function scan(client,{address,city,maxStores=3,maxQuotes=24,radiusM
       const withCoupons=owned.flatMap(coupon=>coupon.products.filter(p=>p.code&&isFood(p.name)).map(item=>({item,store,ctx,coupon})));
       // Coupon-specific product codes cannot be replaced with menu product codes.
       const seen=new Set();pools.push([...withCoupons,...base].filter(c=>{
+        // Scope the candidates before truncation, so cheap drinks cannot crowd out meals.
+        if(category!=='all'&&c.item.category!==category)return false;
         const key=`${c.item.code}:${c.coupon?.id??''}:${c.coupon?.instance??''}`;
         if(seen.has(key))return false;seen.add(key);return true;
       }));queriedStores++;
@@ -64,5 +67,5 @@ export async function scan(client,{address,city,maxStores=3,maxQuotes=24,radiusM
     if(!found)break;index++;
   }
   return {mode:'live',offers:rankOffers(offers),coupons,campaigns,warnings,checkedAt:new Date().toISOString(),
-    coverage:{stores:queriedStores,foundStores:stores.length,candidates,quoted,truncated:quoted<candidates||selected.length<stores.length,maxQuotes,radiusMeters,orderMode:'到店取餐',statement:'本次查询范围内、已通过官方计价的最低实付；未覆盖候选不作价格承诺'}};
+    coverage:{category,stores:queriedStores,foundStores:stores.length,candidates,quoted,truncated:quoted<candidates||selected.length<stores.length,maxQuotes,radiusMeters,orderMode:'到店取餐',statement:'本次查询范围内、已通过官方计价的最低实付；未覆盖候选不作价格承诺'}};
 }
