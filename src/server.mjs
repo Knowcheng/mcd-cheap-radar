@@ -56,8 +56,9 @@ export function createApp({clientFactory=token=>new McpClient(token),sessions=ne
    active.busy=true;acquired=true;
    if(path==='/api/scan'){
     if(typeof input.address!=='string'||!input.address.trim()||input.address.length>200||typeof input.city!=='string'||input.city.length>30)throw problem(400,'请填写城市和附近地点');
+    if(input.category!==undefined&&!['all','meal','drink','snack'].includes(input.category))throw problem(400,'请选择有效的餐品分类');
     const radius=Math.max(500,Math.min(10000,Number(input.radiusMeters)||3000));
-    send(200,await scan(active.client,{address:input.address,city:input.city,maxStores:3,maxQuotes:24,radiusMeters:radius}));return;
+    send(200,await scan(active.client,{address:input.address,city:input.city,category:input.category,maxStores:3,maxQuotes:24,radiusMeters:radius}));return;
    }
    if(input.confirm!==true)throw problem(400,'领取免费券需要你明确确认');
    payload(await active.client.call('auto-bind-coupons',active.client.args('auto-bind-coupons',{})));
