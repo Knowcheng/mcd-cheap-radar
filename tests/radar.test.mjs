@@ -77,3 +77,24 @@ test('water is a drink and a meal containing cola stays a meal',()=>{
  const menu=normalizeMenu({data:{meals:{a:{name:'纯悦',currentPrice:'7.5'},b:{name:'汉堡可乐双人餐',currentPrice:'30'}}}});
  assert.deepEqual(menu.map(x=>x.category),['drink','meal']);
 });
+test('meal search reserves its quote budget for meals even behind many cheap snacks',async()=>{
+ const calls=[];
+ const meals=Object.fromEntries(Array.from({length:30},(_,i)=>[`s${i}`,{name:'圆筒冰淇淋',currentPrice:'5'}]));
+ meals.burger={name:'吉士汉堡',currentPrice:'12'};
+ const client={args:(_n,a)=>a,call:async(name,args)=>{
+  if(name==='query-nearby-stores')return {data:[{storeCode:'A',storeName:'近店',distance:100}]};
+  if(name==='query-meals')return {data:{meals}};
+  if(name==='query-store-coupons')return {data:[{couponId:'drink-coupon',title:'9.9元冰美式',products:[{productCode:'coffee',productName:'冰美式'}]}]};
+  if(name==='calculate-price'){calls.push(args.items[0].productCode);return {data:{price:1200,productList:[{productCode:args.items[0].productCode,quantity:1}]}};}
+  return '';
+ }};
+ const result=await scan(client,{address:'商场',category:'meal',maxQuotes:24});
+ assert.deepEqual(calls,['burger']);
+ assert.equal(result.offers[0].category,'meal');
+ assert.equal(result.coverage.category,'meal');
+ assert.equal(result.coverage.candidates,1);
+});
+test('unsupported categories fail before calling official tools',async()=>{
+ const client={call:()=>{throw new Error('should not call');}};
+ await assert.rejects(scan(client,{address:'商场',category:'unknown'}),/餐品分类/);
+});
