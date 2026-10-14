@@ -1,0 +1,7 @@
+.env
+.env.*
+.git
+.superpowers
+artifacts
+node_modules
+tests
