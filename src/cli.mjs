@@ -29,7 +29,7 @@ async function main(){
    payload(await client.call('auto-bind-coupons',client.args('auto-bind-coupons',{})));
    console.log('官方一键领券已执行，请运行 scan 验证当前门店可用价格。');return;
   }
-  const options={address:value('--address',process.env.MCD_TEST_ADDRESS),city:value('--city',process.env.MCD_TEST_CITY),maxStores:Number(value('--stores','3')),maxQuotes:Number(value('--quotes','24')),radiusMeters:Number(value('--radius','3000'))};
+  const options={address:value('--address',process.env.MCD_TEST_ADDRESS),city:value('--city',process.env.MCD_TEST_CITY),category:value('--category','all'),maxStores:Number(value('--stores','3')),maxQuotes:Number(value('--quotes','24')),radiusMeters:Number(value('--radius','3000'))};
    const result=await scan(client,options);
    print(result);
    if(args.includes('--save-summary')){
