@@ -62,3 +62,18 @@ test('a rejected concurrent request cannot release the running scan lock',async 
  release();await scan;
  assert.equal(first.status,409);assert.equal(second.status,409);
 });
+test('scan API passes the requested category to candidate search and rejects invalid ones',async t=>{
+ const quoted=[];
+ const {request}=await app(t,{clientFactory:()=>({connect:async()=>{},close(){},args:(_n,a)=>a,call:async(name,args)=>{
+  if(name==='query-nearby-stores')return {data:[{storeCode:'A',storeName:'门店',distance:100}]};
+  if(name==='query-meals')return {data:{meals:{snack:{name:'圆筒冰淇淋',currentPrice:'5'},meal:{name:'吉士汉堡',currentPrice:'12'}}}};
+  if(name==='query-store-coupons')return {data:[]};
+  if(name==='calculate-price'){quoted.push(args.items[0].productCode);return {data:{price:1200,productList:[{productCode:args.items[0].productCode,quantity:1}]}};}
+  return {data:[]};
+ }})});
+ const account=await request('/api/connect',{token:'test-account'});
+ const result=await request('/api/scan',{city:'佛山市',address:'商场',category:'meal'},account.cookie);
+ assert.equal(result.status,200);assert.deepEqual(quoted,['meal']);
+ assert.equal(result.data.coverage.category,'meal');
+ assert.equal((await request('/api/scan',{city:'佛山市',address:'商场',category:'unknown'},account.cookie)).status,400);
+});
